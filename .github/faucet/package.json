@@ -1,0 +1,13 @@
+{
+  "name": "funds",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.cjs"
+  },
+  "dependencies": {
+    "@bsv/sdk": "^1.1.33",
+    "axios": "^1.7.8"
+  }
+}
