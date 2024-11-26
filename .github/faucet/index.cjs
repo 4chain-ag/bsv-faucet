@@ -185,6 +185,8 @@ function loadUsers() {
 
 
   configuration.sourceTxId = txId
+  configuration.sourceVout = 0
+  configuration._balance = tx.outputs[0].satoshis
   fs.writeFileSync(path.join(__dirname,'config.json'), JSON.stringify(configuration, null, 2))
 
   // update users files
