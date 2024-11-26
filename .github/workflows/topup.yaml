@@ -5,6 +5,7 @@ concurrency:
   cancel-in-progress: false
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -34,6 +35,8 @@ jobs:
       - name: Top up users
         run: yarn start
         working-directory: .github/faucet
+        env:
+          FAUCET_KEY_WIF: ${{ secrets.FAUCET_KEY_WIF }}
 
       - name: "Commit & Push"
         id: commit
