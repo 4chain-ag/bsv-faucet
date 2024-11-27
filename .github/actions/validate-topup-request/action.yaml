@@ -10,12 +10,14 @@ runs:
   steps:
     - name: Validate BSV Address
       shell: bash
-      env:
-        REPO: ${{ github.repository }}
       run: |
+        echo "::group::Logs"
+        echo "Searching for BSV address in issue body..."
         MATCHES=$(echo "${ISSUE_BODY}" | grep -oE '\b1[a-km-zA-HJ-NP-Z0-9]{26,35}\b')
         MATCH_COUNT=$(echo "$MATCHES" | wc -l)
-
+        echo "Found $MATCH_COUNT matches."
+        echo "Matches: $MATCHES"
+        
         if [ "$MATCH_COUNT" -eq 1 ]; then
           ADDRESS=$(echo "$MATCHES" | head -n 1)
           echo "Address found: $ADDRESS"
@@ -23,6 +25,8 @@ runs:
           gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "topup_request" --remove-label "invalid"
           echo "is_valid=true" >> $GITHUB_OUTPUT
           echo "address=$ADDRESS" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
+          exitCode=0
         elif [ "$MATCH_COUNT" -gt 1 ]; then
           echo "Too many addresses found: $MATCHES"
           COMMENT_BODY="This issue is invalid because it contains too many BSV addresses:\n\n$MATCHES"
@@ -30,11 +34,19 @@ runs:
           gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid" --remove-label "topup_request"
           echo "is_valid=false" >> $GITHUB_OUTPUT
           echo "address=" >> $GITHUB_OUTPUT
-          exit 1
+          echo "::endgroup::"
+          exitCode=113
         else
           echo "No valid addresses found."
           gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "This issue is invalid because it contains no valid BSV addresses."
           gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid" --remove-label "topup_request"
           echo "is_valid=false" >> $GITHUB_OUTPUT
           echo "address=" >> $GITHUB_OUTPUT
-          exit 1
+          echo "::endgroup::"
+          exitCode=113
+        fi
+        
+        echo "::group::Outputs"
+        cat $GITHUB_OUTPUT
+        echo "::endgroup::"
+        exit $exitCode
