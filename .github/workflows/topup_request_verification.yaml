@@ -2,7 +2,7 @@ name: Validate Issue
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
   validate-issue:
