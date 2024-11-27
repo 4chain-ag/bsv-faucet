@@ -1,0 +1,40 @@
+name: Validate Top-Up Request
+description: Find and validate BSV address in an issue
+outputs:
+  is_valid:
+    description: Indicates whether the issue is valid (contains exactly one BSV address).
+  address:
+    description: The valid BSV address if found, otherwise empty.
+runs:
+  using: "composite"
+  steps:
+    - name: Validate BSV Address
+      shell: bash
+      env:
+        REPO: ${{ github.repository }}
+      run: |
+        MATCHES=$(echo "${ISSUE_BODY}" | grep -oE '\b1[a-km-zA-HJ-NP-Z0-9]{26,35}\b')
+        MATCH_COUNT=$(echo "$MATCHES" | wc -l)
+
+        if [ "$MATCH_COUNT" -eq 1 ]; then
+          ADDRESS=$(echo "$MATCHES" | head -n 1)
+          echo "Address found: $ADDRESS"
+          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The following BSV address was found in this issue: `$ADDRESS`"
+          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "topup_request" --remove-label "invalid"
+          echo "is_valid=true" >> $GITHUB_OUTPUT
+          echo "address=$ADDRESS" >> $GITHUB_OUTPUT
+        elif [ "$MATCH_COUNT" -gt 1 ]; then
+          echo "Too many addresses found: $MATCHES"
+          COMMENT_BODY="This issue is invalid because it contains too many BSV addresses:\n\n$MATCHES"
+          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "$COMMENT_BODY"
+          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid" --remove-label "topup_request"
+          echo "is_valid=false" >> $GITHUB_OUTPUT
+          echo "address=" >> $GITHUB_OUTPUT
+          exit 1
+        else
+          echo "No valid addresses found."
+          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "This issue is invalid because it contains no valid BSV addresses."
+          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid" --remove-label "topup_request"
+          echo "is_valid=false" >> $GITHUB_OUTPUT
+          echo "address=" >> $GITHUB_OUTPUT
+          exit 1

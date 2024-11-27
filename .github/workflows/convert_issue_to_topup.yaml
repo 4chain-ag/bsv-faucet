@@ -1,0 +1,76 @@
+name: 'Convert Issue to Top-Up'
+
+on:
+  issues:
+    types:
+      - labeled
+
+jobs:
+  convert:
+    if: github.event.label.name == 'topup'
+    runs-on: ubuntu-latest
+    env:
+      FILE_REPO_URL: 'https://github.com/${{ github.repository }}/blob/main/${{ github.event.issue.user.login }}.json'
+      FILE_PATH: './${{ github.event.issue.user.login }}.json'
+      ISSUER: ${{ github.event.issue.user.login }}
+      LABELER: ${{ github.actor }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Validate Issue
+        id: validate_topup_request
+        uses: ./.github/actions/validate-topup-request
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Check if top up does not exist
+        run: |
+          if [ -f "$FILE_PATH" ]; then
+            echo "The topup file already exists."
+            # Add a comment to the issue that will ask the user who put a label to remove the file or close this issue
+            gh issue comment ${{ github.repository }} ${{ github.event.issue.number }} --body "The user was already topped up. @${{ env.LABELER }} Please remove [the file](${{ env.FILE_REPO_URL }}) or close this issue."
+            gh issue edit ${{ github.repository }} ${{ github.event.issue.number }} --add-label "duplicate"
+            exit 1
+          fi
+
+      - name: Create File with Address
+        run: |
+          # Create the JSON object
+          echo "{\"address\": \"$BSV_ADDRESS\"}" > "$FILE_PATH"
+
+          # Display the content for debugging
+          cat "$FILE_PATH"
+
+      - name: "Commit & Push"
+        id: commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "chore: add topup address for ${{ env.ISSUER }}"
+          default_author: github_actions
+
+      - name: Add Settled Label
+        run: |
+          echo "Adding 'settled' label to the issue."
+          gh issue edit ${{ github.repository }} ${{ github.event.issue.number }} --add-label "settled"
+
+      - name: Add Top-Up Prepared Comment
+        run: |
+          ISSUER="${{ github.event.issue.user.login }}"
+          FILE_PATH="./${ISSUER}.json"
+          REPO_URL="https://github.com/${{ github.repository }}/blob/main/${ISSUER}.json"
+
+          COMMENT_BODY="The topup is prepared. Please watch the file [${FILE_PATH}](${FILE_REPO_URL}) for updates about the top up."
+          echo "Adding comment: $COMMENT_BODY"
+
+          gh issue comment ${{ github.repository }} ${{ github.event.issue.number }} --body "$COMMENT_BODY"
+
+      - name: Remove Topup Label
+        if: always()
+        run: |
+          echo "Removing 'topup' label from the issue."
+          gh issue edit ${{ github.repository }} ${{ github.event.issue.number }} --remove-label "topup"

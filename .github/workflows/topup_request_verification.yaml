@@ -1,0 +1,35 @@
+name: Validate Issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  validate-issue:
+    runs-on: ubuntu-latest
+    env:
+      FILE_REPO_URL: 'https://github.com/${{ github.repository }}/blob/main/${{ github.event.issue.user.login }}.json'
+      FILE_PATH: './${{ github.event.issue.user.login }}.json'
+      ISSUER: ${{ github.event.issue.user.login }}
+      LABELER: ${{ github.actor }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Check if this is a top-up request
+        id: check
+        run: |
+          titleLowercase=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]')
+          if [[ "$titleLowercase" == *"top-up"* ]]; then
+            echo "This is a top-up request."
+            echo "TOPUP_REQUEST=true" >> $GITHUB_ENV
+          else
+            echo "This is not a top-up request."
+            echo "TOPUP_REQUEST=false" >> $GITHUB_ENV
+          fi
+      - name: Use Validate BSV Address Action
+        id: validate_topup_request
+        if: env.TOPUP_REQUEST == 'true'
+        uses: ./.github/actions/validate-topup-request
