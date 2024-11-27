@@ -13,10 +13,15 @@ runs:
       run: |
         echo "::group::Logs"
         echo "Searching for BSV address in issue body..."
-        MATCHES=$(echo "${ISSUE_BODY}" | grep -oE '\b1[a-km-zA-HJ-NP-Z0-9]{26,35}\b')
-        MATCH_COUNT=$(echo "$MATCHES" | wc -l)
-        echo "Found $MATCH_COUNT matches."
+        MATCHES=$(echo "${ISSUE_BODY}" | grep -oE '\b1[a-km-zA-HJ-NP-Z0-9]{26,35}\b' || echo "")
         echo "Matches: $MATCHES"
+        
+        if [ -z "$MATCHES" ]; then
+            MATCH_COUNT=0
+        else
+          MATCH_COUNT=$(echo "$MATCHES" | wc -l)
+        fi
+        echo "Found $MATCH_COUNT matches."
         
         if [ "$MATCH_COUNT" -eq 1 ]; then
           ADDRESS=$(echo "$MATCHES" | head -n 1)
