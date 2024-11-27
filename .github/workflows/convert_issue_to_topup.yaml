@@ -33,8 +33,8 @@ jobs:
           if [ -f "$FILE_PATH" ]; then
             echo "The topup file already exists."
             # Add a comment to the issue that will ask the user who put a label to remove the file or close this issue
-            gh issue comment ${{ github.repository }} ${{ github.event.issue.number }} --body "The user was already topped up. @${{ env.LABELER }} Please remove [the file](${{ env.FILE_REPO_URL }}) or close this issue."
-            gh issue edit ${{ github.repository }} ${{ github.event.issue.number }} --add-label "duplicate"
+            gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The user was already topped up. @${{ env.LABELER }} Please remove [the file](${{ env.FILE_REPO_URL }}) or close this issue."
+            gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "duplicate"
             exit 1
           fi
 
@@ -56,18 +56,14 @@ jobs:
       - name: Add Settled Label
         run: |
           echo "Adding 'settled' label to the issue."
-          gh issue edit ${{ github.repository }} ${{ github.event.issue.number }} --add-label "settled"
+          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "settled"
 
       - name: Add Top-Up Prepared Comment
         run: |
-          ISSUER="${{ github.event.issue.user.login }}"
-          FILE_PATH="./${ISSUER}.json"
-          REPO_URL="https://github.com/${{ github.repository }}/blob/main/${ISSUER}.json"
-
           COMMENT_BODY="The topup is prepared. Please watch the file [${FILE_PATH}](${FILE_REPO_URL}) for updates about the top up."
           echo "Adding comment: $COMMENT_BODY"
 
-          gh issue comment ${{ github.repository }} ${{ github.event.issue.number }} --body "$COMMENT_BODY"
+          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "$COMMENT_BODY"
 
       - name: Remove Topup Label
         if: always()
