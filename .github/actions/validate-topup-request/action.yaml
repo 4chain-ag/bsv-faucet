@@ -26,7 +26,7 @@ runs:
         if [ "$MATCH_COUNT" -eq 1 ]; then
           ADDRESS=$(echo "$MATCHES" | head -n 1)
           echo "Address found: $ADDRESS"
-          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The following BSV address was found in this issue: `$ADDRESS`"
+          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The following BSV address was found in this issue: $ADDRESS"
           gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "topup_request"
         
           hasLabel=$(gh issue view -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --json labels --jq '.labels[].name' | grep -q "invalid" && echo "true" || echo "false")
