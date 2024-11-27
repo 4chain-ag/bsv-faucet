@@ -27,7 +27,14 @@ runs:
           ADDRESS=$(echo "$MATCHES" | head -n 1)
           echo "Address found: $ADDRESS"
           gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The following BSV address was found in this issue: `$ADDRESS`"
-          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "topup_request" --remove-label "invalid"
+          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "topup_request"
+        
+          hasLabel=$(gh issue view -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --json labels --jq '.labels[].name' | grep -q "invalid" && echo "true" || echo "false")
+          if [ "$hasLabel" = "true" ]; then
+            echo "removing label 'invalid'"
+            gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --remove-label "invalid"
+          fi
+        
           echo "is_valid=true" >> $GITHUB_OUTPUT
           echo "address=$ADDRESS" >> $GITHUB_OUTPUT
           echo "::endgroup::"
@@ -36,7 +43,14 @@ runs:
           echo "Too many addresses found: $MATCHES"
           COMMENT_BODY="This issue is invalid because it contains too many BSV addresses:\n\n$MATCHES"
           gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "$COMMENT_BODY"
-          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid" --remove-label "topup_request"
+          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid"
+        
+          hasLabel=$(gh issue view -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --json labels --jq '.labels[].name' | grep -q "topup_request" && echo "true" || echo "false")
+          if [ "$hasLabel" = "true" ]; then
+            echo "removing label 'topup_request'"
+            gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --remove-label "topup_request"
+          fi
+        
           echo "is_valid=false" >> $GITHUB_OUTPUT
           echo "address=" >> $GITHUB_OUTPUT
           echo "::endgroup::"
@@ -44,7 +58,14 @@ runs:
         else
           echo "No valid addresses found."
           gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "This issue is invalid because it contains no valid BSV addresses."
-          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid" --remove-label "topup_request"
+          gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "invalid"
+        
+          hasLabel=$(gh issue view -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --json labels --jq '.labels[].name' | grep -q "topup_request" && echo "true" || echo "false")
+          if [ "$hasLabel" = "true" ]; then
+            echo "removing label 'topup_request'"
+            gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --remove-label "topup_request"
+          fi
+        
           echo "is_valid=false" >> $GITHUB_OUTPUT
           echo "address=" >> $GITHUB_OUTPUT
           echo "::endgroup::"

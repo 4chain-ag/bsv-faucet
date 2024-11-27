@@ -73,4 +73,8 @@ jobs:
         if: always()
         run: |
           echo "Removing 'topup' label from the issue."
-          gh issue edit ${{ github.repository }} ${{ github.event.issue.number }} --remove-label "topup"
+          hasLabel=$(gh issue view -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --json labels --jq '.labels[].name' | grep -q "topup" && echo "true" || echo "false")
+          if [ "$hasLabel" = "true" ]; then
+            echo "removing label 'topup'"
+            gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --remove-label "topup"
+          fi
