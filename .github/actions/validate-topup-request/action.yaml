@@ -37,6 +37,7 @@ runs:
         
           echo "is_valid=true" >> $GITHUB_OUTPUT
           echo "address=$ADDRESS" >> $GITHUB_OUTPUT
+          echo "BSV_ADDRESS=$ADDRESS" >> $GITHUB_ENV
           echo "::endgroup::"
           exitCode=0
         elif [ "$MATCH_COUNT" -gt 1 ]; then
