@@ -1,3 +1,19 @@
+## For any GitHub user
+
+### How to request for top up
+
+- open an issue tab in this repository.
+- click the button "New issue".
+- Find a "Top-Up Request" template and click "Get started" button.
+- Keep the title as is (or at least don't remove provided title)
+- Fill the description according to instruction (generally speaking just replace a placeholder with your BSV address)
+- Click "Submit new issue" button.
+- Wait for automatic validation of the issue
+- Wait for someone to approve your request
+- Follow the instructions provided in comments.
+
+
+## For Users with write access to this repository
 ### How to request for top up
 
 
