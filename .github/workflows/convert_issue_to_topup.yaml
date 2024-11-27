@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FILE_REPO_URL: 'https://github.com/${{ github.repository }}/blob/main/${{ github.event.issue.user.login }}.json'
-      FILE_PATH: './${{ github.event.issue.user.login }}.json'
+      FILE_PATH: '${{ github.event.issue.user.login }}.json'
       ISSUER: ${{ github.event.issue.user.login }}
       LABELER: ${{ github.actor }}
       ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -27,6 +27,8 @@ jobs:
       - name: Validate Issue
         id: validate_topup_request
         uses: ./.github/actions/validate-topup-request
+        with:
+          success_comment: 'Preparing top-up for address:'
 
       - name: Check if top up does not exist
         run: |

@@ -1,5 +1,10 @@
 name: Validate Top-Up Request
 description: Find and validate BSV address in an issue
+inputs:
+  success_comment:
+    description: Comment to post when a valid BSV address is found (will be appended with found address).
+    required: false
+    default: "The following BSV address was found in this issue:"
 outputs:
   is_valid:
     description: Indicates whether the issue is valid (contains exactly one BSV address).
@@ -26,7 +31,7 @@ runs:
         if [ "$MATCH_COUNT" -eq 1 ]; then
           ADDRESS=$(echo "$MATCHES" | head -n 1)
           echo "Address found: $ADDRESS"
-          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The following BSV address was found in this issue: $ADDRESS"
+          gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "${{ inputs.success_comment }} $ADDRESS"
         
           hasLabel=$(gh issue view -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --json labels --jq '.labels[].name' | grep -q "invalid" && echo "true" || echo "false")
           if [ "$hasLabel" = "true" ]; then
