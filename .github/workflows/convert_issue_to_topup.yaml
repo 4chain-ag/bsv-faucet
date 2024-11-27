@@ -31,13 +31,22 @@ jobs:
           success_comment: 'Preparing top-up for address:'
 
       - name: Check if top up does not exist
+        if: vars.OVERRIDE_DUPLICATES != 'true'
         run: |
           if [ -f "$FILE_PATH" ]; then
             echo "The topup file already exists."
-            # Add a comment to the issue that will ask the user who put a label to remove the file or close this issue
             gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The user was already topped up. @${{ env.LABELER }} Please remove [the file](${{ env.FILE_REPO_URL }}) or close this issue."
             gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "duplicate"
             exit 1
+          fi
+
+      - name: Check if top up does not exist
+        if: vars.OVERRIDE_DUPLICATES == 'true'
+        run: |
+          if [ -f "$FILE_PATH" ]; then
+            echo "The topup file already exists. Allowing for overriding"
+            gh issue comment -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --body "The user was already topped up. I will override the existing top-up."
+            gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "duplicate"
           fi
 
       - name: Create File with Address
@@ -72,7 +81,13 @@ jobs:
             gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --remove-label "topup"
           fi
 
-      - name: Add Settled Label
+      - name: Mark as Settled
         run: |
+          hasLabel=$(gh issue view -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --json labels --jq '.labels[].name' | grep -q "topup_request" && echo "true" || echo "false")
+          if [ "$hasLabel" = "true" ]; then
+            echo "removing label 'topup_request'"
+            gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --remove-label "topup_request"
+          fi
+          
           echo "Adding 'settled' label to the issue."
           gh issue edit -R "$GITHUB_REPOSITORY" "${ISSUE_NUMBER}" --add-label "settled"
