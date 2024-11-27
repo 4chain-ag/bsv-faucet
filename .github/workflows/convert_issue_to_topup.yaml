@@ -19,14 +19,14 @@ jobs:
       GH_TOKEN: ${{ github.token }}
 
     steps:
-      - name: Validate Issue
-        id: validate_topup_request
-        uses: ./.github/actions/validate-topup-request
-
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Validate Issue
+        id: validate_topup_request
+        uses: ./.github/actions/validate-topup-request
 
       - name: Check if top up does not exist
         run: |

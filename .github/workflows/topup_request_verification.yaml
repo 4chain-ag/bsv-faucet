@@ -29,6 +29,11 @@ jobs:
             echo "This is not a top-up request."
             echo "TOPUP_REQUEST=false" >> $GITHUB_ENV
           fi
+
+      # Required for running local actions
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Use Validate BSV Address Action
         id: validate_topup_request
         if: env.TOPUP_REQUEST == 'true'
