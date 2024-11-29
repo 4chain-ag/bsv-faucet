@@ -3,6 +3,7 @@ const configuration = require("./config.json");
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const SatoshisPerKilobyte = require("@bsv/sdk/src/transaction/fee-models/SatoshisPerKilobyte.js");
 
 const usersDir = path.join(__dirname, '../../');
 
@@ -161,7 +162,7 @@ function loadUsers() {
     tx.addOutput(user.output)
   })
 
-  await tx.fee()
+  await tx.fee(new SatoshisPerKilobyte(1))
   await tx.sign()
 
   const fee = tx.getFee()
