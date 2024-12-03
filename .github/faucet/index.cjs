@@ -1,9 +1,8 @@
-const {PrivateKey, P2PKH, Transaction} = require("@bsv/sdk");
+const {PrivateKey, P2PKH, Transaction, SatoshisPerKilobyte} = require("@bsv/sdk");
 const configuration = require("./config.json");
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const SatoshisPerKilobyte = require("@bsv/sdk/src/transaction/fee-models/SatoshisPerKilobyte.js");
 
 const usersDir = path.join(__dirname, '../../');
 
