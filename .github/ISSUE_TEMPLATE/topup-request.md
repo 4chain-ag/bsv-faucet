@@ -1,7 +1,7 @@
 ---
 name: Top-Up Request
 about: Request a top-up by providing your Bitcoin SV (BSV) address.
-title: "Request for Top-Up"
+title: "Request for Top-Up for <<username>>"
 assignees: ""
 ---
 
