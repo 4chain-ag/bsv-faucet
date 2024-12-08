@@ -1,0 +1,16 @@
+name: 'Paymail Top-Up'
+description: 'Request for Paymail transaction.'
+title: "Request for Paymail transaction for user: {{username}}"
+labels:
+  - paymail_topup
+body:
+  - type: input
+    id: paymail
+    attributes:
+      label: Paymail alias
+      description: what is your paymail alias?
+      placeholder: alias
+    validations:
+      required: true
+
+
