@@ -2,6 +2,6 @@
   "address": "1GEHHpgtd7vrYDmGFMkhrQheFhWkLnYfuH",
   "sourceTxId": "cafb05f8426c93e6a17c4dbffb688635b9c12e43bca7cd44da92e3c46f1d3a5b",
   "sourceVout": 0,
-  "topUpValue": 100,
+  "topUpValue": 5000,
   "_balance": 114667
 }
