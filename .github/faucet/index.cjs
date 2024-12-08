@@ -119,7 +119,6 @@ function loadUsers() {
 
 (async function () {
   const config = getConfig()
-  console.debug(config)
 
   const input = await loadInput(config)
   console.debug(input)
